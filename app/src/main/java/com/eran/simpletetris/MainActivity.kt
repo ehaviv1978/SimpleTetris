@@ -1,12 +1,14 @@
 package com.eran.simpletetris
 
+import android.app.ActionBar
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.String
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.random.Random.Default.nextInt
@@ -43,19 +45,33 @@ class MainActivity : AppCompatActivity() {
             View_16_0, View_16_1, View_16_2, View_16_3, View_16_4, View_16_5, View_16_6, View_16_7, View_16_8, View_16_9
         )
 
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        var width = displayMetrics.widthPixels
+        var height = displayMetrics.heightPixels
+        var squareSize = (height-200)/25
+        var startPosition =4
+
+
+        for (item in board1d) {
+            item.layoutParams.height=squareSize
+            item.layoutParams.width=squareSize
+        }
+
         val rowsShapeLand = mutableSetOf<Int>()
         var score =0
         var delay: Long = 1000
         var shape = Shape.values()[(nextInt(Shape.values().size))]
 
         val shapeMap = mapOf(
-            Shape.Line to arrayOf(0, 10, 20, 30),
-            Shape.Square to arrayOf(0, 1, 10, 11),
-            Shape.Plus to arrayOf(0, 1, 2, 11),
-            Shape.S1 to arrayOf(0, 1, 11, 12),
-            Shape.S2 to arrayOf(1, 2, 10, 11),
-            Shape.L1 to arrayOf(0, 1, 2, 10),
-            Shape.L2 to arrayOf(0, 1, 2, 12)
+            Shape.Line to arrayOf(0 +startPosition, 10+startPosition, 20+startPosition, 30+startPosition),
+            Shape.Square to arrayOf(0+startPosition, 1+startPosition, 10+startPosition, 11+startPosition),
+            Shape.Plus to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 11+startPosition),
+            Shape.S1 to arrayOf(0+startPosition, 1+startPosition, 11+startPosition, 12+startPosition),
+            Shape.S2 to arrayOf(1+startPosition, 2+startPosition, 10+startPosition, 11+startPosition),
+            Shape.L1 to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 10+startPosition),
+            Shape.L2 to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 12+startPosition)
         )
 
         var shapeArray = intArrayOf(4)
@@ -76,11 +92,12 @@ class MainActivity : AppCompatActivity() {
 
         fun newBoard() {
             score =0
+            delay = 1000
             setScore()
             runOnUiThread {
                 textInfo.visibility = View.INVISIBLE
                 btnMoveDown.isEnabled = true
-                btnRotate.isEnabled = true
+//                btnRotate.isEnabled = true
                 btnMoveLeft.isEnabled = true
                 btnMoveRight.isEnabled = true
             }
@@ -93,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         fun gameOver(){
             runOnUiThread {
                 btnMoveDown.isEnabled = false
-                btnRotate.isEnabled = false
+//                btnRotate.isEnabled = false
                 btnMoveLeft.isEnabled = false
                 btnMoveRight.isEnabled = false
                 textInfo.visibility = View.VISIBLE
@@ -472,7 +489,11 @@ class MainActivity : AppCompatActivity() {
             moveDown()
         }
 
-        btnRotate.setOnClickListener() {
+//        btnRotate.setOnClickListener() {
+//            rotate()
+//        }
+
+        GameBoard.setOnClickListener(){
             rotate()
         }
 
