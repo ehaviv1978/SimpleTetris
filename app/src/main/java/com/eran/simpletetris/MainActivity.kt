@@ -1,17 +1,20 @@
 package com.eran.simpletetris
 
-import android.app.ActionBar
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.random.Random.Default.nextInt
+
+//private const val TAG = "Gestures"
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,9 +24,19 @@ class MainActivity : AppCompatActivity() {
         Line, Square, Plus, S1, S2, L1, L2
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        btnLeft.isEnabled = false
+        btnRight.isEnabled = false
+        btnDown.isEnabled = false
+        GameBoard.isEnabled = false
+
+//        val rows = arrayOf(
+//            Row_0, Row_1, Row_2, Row_3, Row_4, Row_5, Row_6, Row_7, Row_8, Row_9, Row_10, Row_11, Row_12, Row_13, Row_14, Row_15, Row_16
+//        )
 
         val board1d = arrayOf(
             View_0_0, View_0_1, View_0_2, View_0_3, View_0_4, View_0_5, View_0_6, View_0_7, View_0_8, View_0_9,
@@ -48,30 +61,34 @@ class MainActivity : AppCompatActivity() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-        var width = displayMetrics.widthPixels
+//        var width = displayMetrics.widthPixels
         var height = displayMetrics.heightPixels
-        var squareSize = (height-200)/25
-        var startPosition =4
+        var squareSize = (height - 200) / 25
+        var startPosition = 4
 
+//        var shapeTop = GameBoard.top
+//        var shapeBottom = GameBoard.bottom
+//        var shapeLeft = GameBoard.left
+//        var shapeRight = GameBoard.right
 
         for (item in board1d) {
-            item.layoutParams.height=squareSize
-            item.layoutParams.width=squareSize
+            item.layoutParams.height = squareSize
+            item.layoutParams.width = squareSize
         }
 
         val rowsShapeLand = mutableSetOf<Int>()
-        var score =0
+        var score = 0
         var delay: Long = 1000
         var shape = Shape.values()[(nextInt(Shape.values().size))]
 
         val shapeMap = mapOf(
-            Shape.Line to arrayOf(0 +startPosition, 10+startPosition, 20+startPosition, 30+startPosition),
-            Shape.Square to arrayOf(0+startPosition, 1+startPosition, 10+startPosition, 11+startPosition),
-            Shape.Plus to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 11+startPosition),
-            Shape.S1 to arrayOf(0+startPosition, 1+startPosition, 11+startPosition, 12+startPosition),
-            Shape.S2 to arrayOf(1+startPosition, 2+startPosition, 10+startPosition, 11+startPosition),
-            Shape.L1 to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 10+startPosition),
-            Shape.L2 to arrayOf(0+startPosition, 1+startPosition, 2+startPosition, 12+startPosition)
+            Shape.Line to arrayOf(0 + startPosition, 10 + startPosition, 20 + startPosition, 30 + startPosition),
+            Shape.Square to arrayOf(0 + startPosition, 1 + startPosition, 10 + startPosition, 11 + startPosition),
+            Shape.Plus to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 11 + startPosition),
+            Shape.S1 to arrayOf(0 + startPosition, 1 + startPosition, 11 + startPosition, 12 + startPosition),
+            Shape.S2 to arrayOf(1 + startPosition, 2 + startPosition, 10 + startPosition, 11 + startPosition),
+            Shape.L1 to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 10 + startPosition),
+            Shape.L2 to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 12 + startPosition)
         )
 
         var shapeArray = intArrayOf(4)
@@ -86,47 +103,69 @@ class MainActivity : AppCompatActivity() {
             Shape.L2 to Color.LTGRAY
         )
 
-        fun setScore(){
+//        fun getShapePosition() {
+//            shapeTop = rows[shapeArray[0] / 10].top
+//            shapeBottom = rows[shapeArray[0] / 10].bottom
+//            shapeLeft = board1d[shapeArray[0]].left
+//            shapeRight = board1d[shapeArray[0]].right
+//            for (n in shapeArray) {
+//                if (rows[n / 10].top < shapeTop) {
+//                    shapeTop = rows[n / 10].top
+//                }
+//                if (rows[n / 10].bottom > shapeBottom) {
+//                    shapeBottom = rows[n / 10].bottom
+//                }
+//                if (board1d[n].left < shapeLeft) {
+//                    shapeLeft = board1d[n].left
+//                }
+//                if (board1d[n].right > shapeRight) {
+//                    shapeRight = board1d[n].right
+//                }
+//            }
+//        }
+
+        fun setScore() {
             runOnUiThread { textScoreVal.text = score.toString() }
         }
 
         fun newBoard() {
-            score =0
+            score = 0
             delay = 1000
             setScore()
             runOnUiThread {
                 textInfo.visibility = View.INVISIBLE
-                btnMoveDown.isEnabled = true
-//                btnRotate.isEnabled = true
-                btnMoveLeft.isEnabled = true
-                btnMoveRight.isEnabled = true
             }
             for (item in board1d) {
                 item.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 item.tag = "Empty"
             }
+            btnLeft.isEnabled = true
+            btnRight.isEnabled = true
+            btnDown.isEnabled = true
+            GameBoard.isEnabled = true
         }
 
-        fun gameOver(){
+        fun gameOver() {
+            btnLeft.isEnabled = false
+            btnRight.isEnabled = false
+            btnDown.isEnabled = false
+            GameBoard.isEnabled = false
             runOnUiThread {
-                btnMoveDown.isEnabled = false
-//                btnRotate.isEnabled = false
-                btnMoveLeft.isEnabled = false
-                btnMoveRight.isEnabled = false
                 textInfo.visibility = View.VISIBLE
             }
         }
 
-        fun newShape():Boolean {
+        fun newShape(): Boolean {
             shape = Shape.values()[(nextInt(Shape.values().size))]
             shapeArray = shapeMap[shape]?.toIntArray()!!
             for (n in shapeArray) {
-                if (board1d[n].tag == "Full"){
+                if (board1d[n].tag == "Full") {
                     return false
                 }
                 board1d[n].backgroundTintList = ColorStateList.valueOf(shapeColorMap[shape] as Int)
                 board1d[n].tag = "Shape"
             }
+//            getShapePosition()
             return true
         }
 
@@ -143,6 +182,7 @@ class MainActivity : AppCompatActivity() {
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] + 1
             }
+//            getShapePosition()
         }
 
         fun moveLeft() {
@@ -158,6 +198,7 @@ class MainActivity : AppCompatActivity() {
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] - 1
             }
+//            getShapePosition()
         }
 
         fun rowsToDelete() {
@@ -217,7 +258,7 @@ class MainActivity : AppCompatActivity() {
                         timer.schedule(delay) {
                             moveDown()
                         }
-                    }else {
+                    } else {
                         gameOver()
                     }
                     return
@@ -230,6 +271,7 @@ class MainActivity : AppCompatActivity() {
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] + 10
             }
+//            getShapePosition()
             timer.schedule(delay) {
                 moveDown()
             }
@@ -475,27 +517,53 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        btnMoveRight.setOnClickListener() {
-            moveRight()
-        }
-
-        btnMoveLeft.setOnClickListener() {
-            moveLeft()
-        }
-
-        btnMoveDown.setOnClickListener() {
+        btnDown.setOnClickListener(){
             timer.cancel()
             timer = Timer()
             moveDown()
         }
 
-//        btnRotate.setOnClickListener() {
-//            rotate()
-//        }
+        btnRight.setOnClickListener(){
+            moveRight()
+        }
+
+        btnLeft.setOnClickListener(){
+            moveLeft()
+        }
 
         GameBoard.setOnClickListener(){
             rotate()
         }
 
+//        GameBoard.setOnTouchListener(View.OnTouchListener { _, event ->
+//            val x = event.x
+//            val y = event.y
+//            when (event.action) {
+//                MotionEvent.ACTION_DOWN -> {
+//                    if (y > shapeBottom) {
+//                        timer.cancel()
+//                        timer = Timer()
+//                        moveDown()
+//                    } else if (x < shapeLeft) {
+//                        moveLeft()
+//                    } else if (x > shapeRight) {
+//                        moveRight()
+//                    } else if (y < shapeTop) {
+//                        rotate()
+//                    }
+//                    Log.d(TAG, "ACTION_DOWN \nx: $x\ny: $y")
+//                }
+//                MotionEvent.ACTION_MOVE -> {
+//                    Log.d(TAG, "ACTION_MOVE \nx: $x\ny: $y")
+//                }
+//                MotionEvent.ACTION_UP -> {
+//                    Log.d(TAG, "ACTION_UP \nx: $x\ny: $y")
+//                }
+//            }
+//            return@OnTouchListener true
+//        })
+
     }
+
+
 }
