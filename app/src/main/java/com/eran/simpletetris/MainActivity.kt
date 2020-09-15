@@ -19,6 +19,7 @@ import kotlin.random.Random.Default.nextInt
 class MainActivity : AppCompatActivity() {
 
     private var timer = Timer()
+    private var localTimer = Timer()
 
     enum class Shape {
         Line, Square, Plus, S1, S2, L1, L2
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity() {
         var height = displayMetrics.heightPixels
         var squareSize = (height - 200) / 25
         var startPosition = 4
+        var gameOver = true
+        var btnDownIsPressed = false
 
 //        var shapeTop = GameBoard.top
 //        var shapeBottom = GameBoard.bottom
@@ -100,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             Shape.S1 to Color.RED,
             Shape.S2 to Color.YELLOW,
             Shape.L1 to Color.MAGENTA,
-            Shape.L2 to Color.LTGRAY
+            Shape.L2 to Color.WHITE
         )
 
 //        fun getShapePosition() {
@@ -132,30 +135,38 @@ class MainActivity : AppCompatActivity() {
             score = 0
             delay = 1000
             setScore()
+            gameOver = false
             runOnUiThread {
                 textInfo.visibility = View.INVISIBLE
             }
             for (item in board1d) {
                 item.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 item.tag = "Empty"
+
             }
-            btnLeft.isEnabled = true
-            btnRight.isEnabled = true
-            btnDown.isEnabled = true
-            GameBoard.isEnabled = true
+            runOnUiThread {
+                btnLeft.isEnabled = true
+                btnRight.isEnabled = true
+                btnDown.isEnabled = true
+                GameBoard.isEnabled = true
+            }
         }
 
         fun gameOver() {
-            btnLeft.isEnabled = false
-            btnRight.isEnabled = false
-            btnDown.isEnabled = false
-            GameBoard.isEnabled = false
+            gameOver = true
             runOnUiThread {
+                btnLeft.isEnabled = false
+                btnRight.isEnabled = false
+                btnDown.isEnabled = false
+                GameBoard.isEnabled = false
                 textInfo.visibility = View.VISIBLE
             }
         }
 
         fun newShape(): Boolean {
+            timer.cancel()
+            timer = Timer()
+            btnDownIsPressed = false
             shape = Shape.values()[(nextInt(Shape.values().size))]
             shapeArray = shapeMap[shape]?.toIntArray()!!
             for (n in shapeArray) {
@@ -236,6 +247,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun moveDown() {
+            GameBoard.invalidate()
+            btnNewGame.invalidate()
             score++
             setScore()
             delay--
@@ -255,6 +268,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     rowsShapeLand.clear()
                     if (newShape()) {
+                        timer.cancel()
+                        timer = Timer()
                         timer.schedule(delay) {
                             moveDown()
                         }
@@ -272,8 +287,12 @@ class MainActivity : AppCompatActivity() {
                 shapeArray[i] = shapeArray[i] + 10
             }
 //            getShapePosition()
-            timer.schedule(delay) {
-                moveDown()
+            if (!btnDownIsPressed) {
+                timer.cancel()
+                timer = Timer()
+                timer.schedule(delay) {
+                    moveDown()
+                }
             }
         }
 
@@ -467,7 +486,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 10
                     shapeArray[3] = shapeArray[1] + 10
                     shapeArray[2] = shapeArray[3] - 1
-                    createShape(Color.LTGRAY)
+                    createShape(shapeColorMap[Shape.L2]!!)
                 } else if (shapeArray[3] - shapeArray[1] == 10) {
                     if (shapeArray[1] % 10 == 9 || board1d[shapeArray[1] + 1].tag != "Empty" ||
                         board1d[shapeArray[1] - 1].tag != "Empty" || board1d[shapeArray[1] - 11].tag != "Empty"
@@ -479,7 +498,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1] = shapeArray[2] - 1
                     shapeArray[3] = shapeArray[2] + 1
                     shapeArray[0] = shapeArray[1] - 10
-                    createShape(Color.LTGRAY)
+                    createShape(shapeColorMap[Shape.L2]!!)
                 } else if (shapeArray[3] - shapeArray[1] == 2) {
                     if (shapeArray[1] / 10 == 16 || board1d[shapeArray[2] + 10].tag != "Empty" ||
                         board1d[shapeArray[2] - 9].tag != "Empty" || board1d[shapeArray[2] - 10].tag != "Empty"
@@ -490,7 +509,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[2] - 10
                     shapeArray[1] = shapeArray[0] + 1
                     shapeArray[3] = shapeArray[2] + 10
-                    createShape(Color.LTGRAY)
+                    createShape(shapeColorMap[Shape.L2]!!)
                 } else {
                     if (shapeArray[0] % 10 == 0 || board1d[shapeArray[2] - 1].tag != "Empty" ||
                         board1d[shapeArray[2] + 1].tag != "Empty" || board1d[shapeArray[2] + 11].tag != "Empty"
@@ -502,7 +521,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 1
                     shapeArray[2] = shapeArray[1] + 1
                     shapeArray[3] = shapeArray[2] + 10
-                    createShape(Color.LTGRAY)
+                    createShape(shapeColorMap[Shape.L2]!!)
                 }
             }
         }
@@ -517,21 +536,72 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        btnDown.setOnClickListener(){
-            timer.cancel()
-            timer = Timer()
-            moveDown()
+        btnDown.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    btnDownIsPressed = true
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(200, 40) {
+                        if (gameOver) {
+                            timer.cancel()
+                        } else {
+                            moveDown()
+                        }
+                    }
+
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (btnDownIsPressed) {
+                        btnDownIsPressed = false
+                        if (!gameOver) {
+                            timer.cancel()
+                            timer = Timer()
+                            moveDown()
+                        } else {
+                            timer.cancel()
+                        }
+                    }
+                }
+            }
+            v?.onTouchEvent(event) ?: true
         }
 
-        btnRight.setOnClickListener(){
-            moveRight()
+        btnRight.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    moveRight()
+                    localTimer = Timer()
+                    localTimer.schedule(200, 20) {
+                        moveRight()
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    localTimer.cancel()
+                }
+            }
+
+            v?.onTouchEvent(event) ?: true
         }
 
-        btnLeft.setOnClickListener(){
-            moveLeft()
+        btnLeft.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    moveLeft()
+                    localTimer = Timer()
+                    localTimer.schedule(200, 20) {
+                        moveLeft()
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    localTimer.cancel()
+                }
+            }
+
+            v?.onTouchEvent(event) ?: true
         }
 
-        GameBoard.setOnClickListener(){
+        GameBoard.setOnClickListener() {
             rotate()
         }
 
