@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,8 +12,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.random.Random.Default.nextInt
-
-//private const val TAG = "Gestures"
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,9 +27,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         btnLeft.isEnabled = false
         btnRight.isEnabled = false
         btnDown.isEnabled = false
+        btnPause.isEnabled = false
+        btnPlay.isEnabled = false
         GameBoard.isEnabled = false
 
 //        val rows = arrayOf(
@@ -62,17 +62,11 @@ class MainActivity : AppCompatActivity() {
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-//        var width = displayMetrics.widthPixels
         var height = displayMetrics.heightPixels
         var squareSize = (height - 200) / 25
         var startPosition = 4
         var gameOver = true
         var btnDownIsPressed = false
-
-//        var shapeTop = GameBoard.top
-//        var shapeBottom = GameBoard.bottom
-//        var shapeLeft = GameBoard.left
-//        var shapeRight = GameBoard.right
 
         for (item in board1d) {
             item.layoutParams.height = squareSize
@@ -81,20 +75,21 @@ class MainActivity : AppCompatActivity() {
 
         val rowsShapeLand = mutableSetOf<Int>()
         var score = 0
-        var delay: Long = 1000
-        var shape = Shape.values()[(nextInt(Shape.values().size))]
+        var delay = 800F
+        var shape = Shape.values()[nextInt(7)]  //get a random shape from Shape Enum
 
         val shapeMap = mapOf(
             Shape.Line to arrayOf(0 + startPosition, 10 + startPosition, 20 + startPosition, 30 + startPosition),
             Shape.Square to arrayOf(0 + startPosition, 1 + startPosition, 10 + startPosition, 11 + startPosition),
-            Shape.Plus to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 11 + startPosition),
-            Shape.S1 to arrayOf(0 + startPosition, 1 + startPosition, 11 + startPosition, 12 + startPosition),
-            Shape.S2 to arrayOf(1 + startPosition, 2 + startPosition, 10 + startPosition, 11 + startPosition),
-            Shape.L1 to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 10 + startPosition),
-            Shape.L2 to arrayOf(0 + startPosition, 1 + startPosition, 2 + startPosition, 12 + startPosition)
+            Shape.Plus to arrayOf(0 + startPosition, 10 + startPosition, 11 + startPosition, 20 + startPosition),
+            Shape.S1 to arrayOf(1 + startPosition, 10 + startPosition, 11 + startPosition, 20 + startPosition),
+            Shape.S2 to arrayOf(0 + startPosition, 10 + startPosition, 11 + startPosition, 21 + startPosition),
+            Shape.L1 to arrayOf(0 + startPosition, 1 + startPosition, 11 + startPosition, 21 + startPosition),
+            Shape.L2 to arrayOf(0 + startPosition, 1 + startPosition, 10 + startPosition, 20 + startPosition)
         )
 
         var shapeArray = intArrayOf(4)
+        var shapeColor: Int = Color.WHITE
 
         val shapeColorMap = mapOf(
             Shape.Line to Color.CYAN,
@@ -106,34 +101,13 @@ class MainActivity : AppCompatActivity() {
             Shape.L2 to Color.WHITE
         )
 
-//        fun getShapePosition() {
-//            shapeTop = rows[shapeArray[0] / 10].top
-//            shapeBottom = rows[shapeArray[0] / 10].bottom
-//            shapeLeft = board1d[shapeArray[0]].left
-//            shapeRight = board1d[shapeArray[0]].right
-//            for (n in shapeArray) {
-//                if (rows[n / 10].top < shapeTop) {
-//                    shapeTop = rows[n / 10].top
-//                }
-//                if (rows[n / 10].bottom > shapeBottom) {
-//                    shapeBottom = rows[n / 10].bottom
-//                }
-//                if (board1d[n].left < shapeLeft) {
-//                    shapeLeft = board1d[n].left
-//                }
-//                if (board1d[n].right > shapeRight) {
-//                    shapeRight = board1d[n].right
-//                }
-//            }
-//        }
-
         fun setScore() {
             runOnUiThread { textScoreVal.text = score.toString() }
         }
 
         fun newBoard() {
             score = 0
-            delay = 1000
+            delay = 800F
             setScore()
             gameOver = false
             runOnUiThread {
@@ -149,6 +123,7 @@ class MainActivity : AppCompatActivity() {
                 btnRight.isEnabled = true
                 btnDown.isEnabled = true
                 GameBoard.isEnabled = true
+                btnPause.isEnabled = true
             }
         }
 
@@ -159,6 +134,8 @@ class MainActivity : AppCompatActivity() {
                 btnRight.isEnabled = false
                 btnDown.isEnabled = false
                 GameBoard.isEnabled = false
+                btnPlay.isEnabled = false
+                btnPause.isEnabled = false
                 textInfo.visibility = View.VISIBLE
             }
         }
@@ -167,16 +144,16 @@ class MainActivity : AppCompatActivity() {
             timer.cancel()
             timer = Timer()
             btnDownIsPressed = false
-            shape = Shape.values()[(nextInt(Shape.values().size))]
+            shape = Shape.values()[nextInt(7)]
             shapeArray = shapeMap[shape]?.toIntArray()!!
+            shapeColor = shapeColorMap[shape]!!
             for (n in shapeArray) {
                 if (board1d[n].tag == "Full") {
                     return false
                 }
-                board1d[n].backgroundTintList = ColorStateList.valueOf(shapeColorMap[shape] as Int)
+                board1d[n].backgroundTintList = ColorStateList.valueOf(shapeColor as Int)
                 board1d[n].tag = "Shape"
             }
-//            getShapePosition()
             return true
         }
 
@@ -187,13 +164,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             for (i in 3 downTo 0) {
-                board1d[shapeArray[i] + 1].backgroundTintList = board1d[shapeArray[i]].backgroundTintList
+                board1d[shapeArray[i] + 1].backgroundTintList = ColorStateList.valueOf(shapeColor)
                 board1d[shapeArray[i] + 1].tag = "Shape"
                 board1d[shapeArray[i]].backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] + 1
             }
-//            getShapePosition()
         }
 
         fun moveLeft() {
@@ -203,13 +179,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             for (i in 0..3) {
-                board1d[shapeArray[i] - 1].backgroundTintList = board1d[shapeArray[i]].backgroundTintList
+                board1d[shapeArray[i] - 1].backgroundTintList = ColorStateList.valueOf(shapeColor)
                 board1d[shapeArray[i] - 1].tag = "Shape"
                 board1d[shapeArray[i]].backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] - 1
             }
-//            getShapePosition()
         }
 
         fun rowsToDelete() {
@@ -248,10 +223,10 @@ class MainActivity : AppCompatActivity() {
 
         fun moveDown() {
             GameBoard.invalidate()
-            btnNewGame.invalidate()
+            btnPlay.invalidate()
             score++
             setScore()
-            delay--
+            delay= (delay * 0.998).toFloat()
             for (n in shapeArray) {
                 if (n / 10 == 16 || board1d[n + 10].tag == "Full") {
                     for (i in shapeArray) {
@@ -270,7 +245,7 @@ class MainActivity : AppCompatActivity() {
                     if (newShape()) {
                         timer.cancel()
                         timer = Timer()
-                        timer.schedule(delay) {
+                        timer.schedule(delay.toLong()) {
                             moveDown()
                         }
                     } else {
@@ -280,17 +255,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             for (i in 3 downTo 0) {
-                board1d[shapeArray[i] + 10].backgroundTintList = board1d[shapeArray[i]].backgroundTintList
+                board1d[shapeArray[i] + 10].backgroundTintList = ColorStateList.valueOf(shapeColor)
                 board1d[shapeArray[i] + 10].tag = "Shape"
                 board1d[shapeArray[i]].backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] + 10
             }
-//            getShapePosition()
             if (!btnDownIsPressed) {
                 timer.cancel()
                 timer = Timer()
-                timer.schedule(delay) {
+                timer.schedule(delay.toLong()) {
                     moveDown()
                 }
             }
@@ -303,9 +277,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun createShape(color: Int) {
+        fun createShape() {
             for (n in shapeArray) {
-                board1d[n].backgroundTintList = ColorStateList.valueOf(color)
+                board1d[n].backgroundTintList = ColorStateList.valueOf(shapeColor)
                 board1d[n].tag = "Shape"
             }
         }
@@ -322,7 +296,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 10
                     shapeArray[2] = shapeArray[1] + 10
                     shapeArray[3] = shapeArray[1] + 20
-                    createShape(Color.CYAN)
+                    createShape()
                 } else {
                     if (shapeArray[0] % 10 == 0 || shapeArray[0] % 10 > 7 || board1d[shapeArray[2] - 1].tag != "Empty" ||
                         board1d[shapeArray[2] + 1].tag != "Empty" || board1d[shapeArray[2] + 2].tag != "Empty"
@@ -333,7 +307,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 1
                     shapeArray[2] = shapeArray[1] + 1
                     shapeArray[3] = shapeArray[1] + 2
-                    createShape(Color.CYAN)
+                    createShape()
                 }
             } else if (shape == Shape.Plus) {
                 if (shapeArray[3] - shapeArray[1] == 10 && shapeArray[1] - shapeArray[0] == 1) {
@@ -345,14 +319,14 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1] = shapeArray[0] + 9
                     shapeArray[2] = shapeArray[1] + 1
                     shapeArray[3] = shapeArray[2] + 10
-                    createShape(Color.GREEN)
+                    createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 11) {
                     if (board1d[shapeArray[2] + 1].tag != "Empty" || shapeArray[2] % 10 == 9) {
                         return
                     }
                     removeShape()
                     shapeArray[3] = shapeArray[2] + 1
-                    createShape(Color.GREEN)
+                    createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 2) {
                     if (shapeArray[2] > 160) {
                         return
@@ -364,14 +338,14 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1]++
                     shapeArray[2]++
                     shapeArray[3] += 9
-                    createShape(Color.GREEN)
+                    createShape()
                 } else {
                     if (board1d[shapeArray[1] - 1].tag != "Empty" || shapeArray[1] % 10 == 0) {
                         return
                     }
                     removeShape()
                     shapeArray[0] = shapeArray[1] - 1
-                    createShape(Color.GREEN)
+                    createShape()
                 }
             } else if (shape == Shape.S1) {
                 if (shapeArray[1] - shapeArray[0] == 1) {
@@ -385,7 +359,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1]
                     shapeArray[1] = shapeArray[2] - 1
                     shapeArray[3] = shapeArray[1] + 10
-                    createShape(Color.RED)
+                    createShape()
                 } else {
                     if (shapeArray[0] % 10 == 9 || board1d[shapeArray[2] + 1].tag == "Full") {
                         return
@@ -394,7 +368,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1] = shapeArray[0]
                     shapeArray[0]--
                     shapeArray[3] = shapeArray[2] + 1
-                    createShape(Color.RED)
+                    createShape()
                 }
             } else if (shape == Shape.S2) {
                 if (shapeArray[1] - shapeArray[0] == 1) {
@@ -409,7 +383,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[3] += 10
                     shapeArray[1] = shapeArray[2] - 1
                     shapeArray[0]--
-                    createShape(Color.YELLOW)
+                    createShape()
                 } else {
                     if (shapeArray[2] % 10 == 9 || board1d[shapeArray[0] + 2].tag == "Full") {
                         return
@@ -419,7 +393,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0]++
                     shapeArray[1] = shapeArray[0] + 1
                     shapeArray[3] = shapeArray[2] + 1
-                    createShape(Color.YELLOW)
+                    createShape()
                 }
             } else if (shape == Shape.L1) {
                 if (shapeArray[1] - shapeArray[0] == 1 && shapeArray[2] - shapeArray[1] == 1) {
@@ -436,7 +410,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1] = shapeArray[2] - 10
                     shapeArray[3] = shapeArray[2] + 10
                     shapeArray[0] = shapeArray[1] - 1
-                    createShape(Color.MAGENTA)
+                    createShape()
                 } else if (shapeArray[1] - shapeArray[0] == 1) {
                     if (shapeArray[1] % 10 == 9 || board1d[shapeArray[2] - 1].tag != "Empty" ||
                         board1d[shapeArray[2] + 11].tag != "Empty" || board1d[shapeArray[2] - 9].tag != "Empty"
@@ -447,7 +421,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[2] - 9
                     shapeArray[1] = shapeArray[2] - 1
                     shapeArray[3] = shapeArray[2] + 1
-                    createShape(Color.MAGENTA)
+                    createShape()
                 } else if (shapeArray[1] - shapeArray[0] == 8) {
                     if (shapeArray[1] / 10 == 16 || board1d[shapeArray[2] + 10].tag != "Empty" ||
                         board1d[shapeArray[2] + 11].tag != "Empty" || board1d[shapeArray[2] - 10].tag != "Empty"
@@ -459,7 +433,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 10
                     shapeArray[2] = shapeArray[1] + 10
                     shapeArray[3] = shapeArray[2] + 1
-                    createShape(Color.MAGENTA)
+                    createShape()
                 } else {
                     if (shapeArray[1] % 10 == 0 || board1d[shapeArray[1] - 1].tag != "Empty" ||
                         board1d[shapeArray[1] + 1].tag != "Empty" || board1d[shapeArray[1] + 9].tag != "Empty"
@@ -470,7 +444,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 1
                     shapeArray[2] = shapeArray[1] + 1
                     shapeArray[3] = shapeArray[0] + 10
-                    createShape(Color.MAGENTA)
+                    createShape()
                 }
             } else if (shape == Shape.L2) {
                 if (shapeArray[3] - shapeArray[1] == 11) {
@@ -486,7 +460,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 10
                     shapeArray[3] = shapeArray[1] + 10
                     shapeArray[2] = shapeArray[3] - 1
-                    createShape(shapeColorMap[Shape.L2]!!)
+                    createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 10) {
                     if (shapeArray[1] % 10 == 9 || board1d[shapeArray[1] + 1].tag != "Empty" ||
                         board1d[shapeArray[1] - 1].tag != "Empty" || board1d[shapeArray[1] - 11].tag != "Empty"
@@ -498,7 +472,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[1] = shapeArray[2] - 1
                     shapeArray[3] = shapeArray[2] + 1
                     shapeArray[0] = shapeArray[1] - 10
-                    createShape(shapeColorMap[Shape.L2]!!)
+                    createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 2) {
                     if (shapeArray[1] / 10 == 16 || board1d[shapeArray[2] + 10].tag != "Empty" ||
                         board1d[shapeArray[2] - 9].tag != "Empty" || board1d[shapeArray[2] - 10].tag != "Empty"
@@ -509,7 +483,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[2] - 10
                     shapeArray[1] = shapeArray[0] + 1
                     shapeArray[3] = shapeArray[2] + 10
-                    createShape(shapeColorMap[Shape.L2]!!)
+                    createShape()
                 } else {
                     if (shapeArray[0] % 10 == 0 || board1d[shapeArray[2] - 1].tag != "Empty" ||
                         board1d[shapeArray[2] + 1].tag != "Empty" || board1d[shapeArray[2] + 11].tag != "Empty"
@@ -521,19 +495,50 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 1
                     shapeArray[2] = shapeArray[1] + 1
                     shapeArray[3] = shapeArray[2] + 10
-                    createShape(shapeColorMap[Shape.L2]!!)
+                    createShape()
                 }
             }
         }
 
-        btnNewGame.setOnClickListener {
-            timer.cancel()
+        btnPlay.setOnClickListener {
+            runOnUiThread {
+                btnLeft.isEnabled = true
+                btnRight.isEnabled = true
+                btnDown.isEnabled = true
+                GameBoard.isEnabled = true
+                btnPause.isEnabled = true
+                btnPlay.isEnabled = false
+            }
             timer = Timer()
-            newBoard()
-            newShape()
-            timer.schedule(delay) {
+            timer.schedule(delay.toLong()) {
                 moveDown()
             }
+        }
+
+        btnReset.setOnClickListener(){
+            timer = Timer()
+            localTimer.cancel()
+            localTimer = Timer()
+            newBoard()
+            newShape()
+            timer = Timer()
+            timer.schedule(delay.toLong()) {
+                moveDown()
+            }
+        }
+
+        btnPause.setOnClickListener(){
+            timer.cancel()
+            localTimer.cancel()
+            runOnUiThread {
+                btnLeft.isEnabled = false
+                btnRight.isEnabled = false
+                btnDown.isEnabled = false
+                GameBoard.isEnabled = false
+                btnPlay.isEnabled = true
+                btnPause.isEnabled =false
+            }
+
         }
 
         btnDown.setOnTouchListener { v, event ->
@@ -580,7 +585,6 @@ class MainActivity : AppCompatActivity() {
                     localTimer.cancel()
                 }
             }
-
             v?.onTouchEvent(event) ?: true
         }
 
@@ -597,43 +601,11 @@ class MainActivity : AppCompatActivity() {
                     localTimer.cancel()
                 }
             }
-
             v?.onTouchEvent(event) ?: true
         }
 
         GameBoard.setOnClickListener() {
             rotate()
         }
-
-//        GameBoard.setOnTouchListener(View.OnTouchListener { _, event ->
-//            val x = event.x
-//            val y = event.y
-//            when (event.action) {
-//                MotionEvent.ACTION_DOWN -> {
-//                    if (y > shapeBottom) {
-//                        timer.cancel()
-//                        timer = Timer()
-//                        moveDown()
-//                    } else if (x < shapeLeft) {
-//                        moveLeft()
-//                    } else if (x > shapeRight) {
-//                        moveRight()
-//                    } else if (y < shapeTop) {
-//                        rotate()
-//                    }
-//                    Log.d(TAG, "ACTION_DOWN \nx: $x\ny: $y")
-//                }
-//                MotionEvent.ACTION_MOVE -> {
-//                    Log.d(TAG, "ACTION_MOVE \nx: $x\ny: $y")
-//                }
-//                MotionEvent.ACTION_UP -> {
-//                    Log.d(TAG, "ACTION_UP \nx: $x\ny: $y")
-//                }
-//            }
-//            return@OnTouchListener true
-//        })
-
     }
-
-
 }
