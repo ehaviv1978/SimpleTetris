@@ -1,6 +1,8 @@
 package com.eran.simpletetris
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -16,6 +18,8 @@ import kotlin.random.Random.Default.nextInt
 
 class MainActivity : AppCompatActivity() {
 
+    private val sharedPrefFile = "com.eran.simpletetris.highScore"
+
     enum class Shape {
         Line, Square, Plus, S1, S2, L1, L2
     }
@@ -24,6 +28,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val sharedPreferences: SharedPreferences = this.getSharedPreferences(sharedPrefFile,Context.MODE_PRIVATE)
+        var highScoreValue = sharedPreferences.getInt("highScore_key",0)
+        textHighScoreVal.text = highScoreValue.toString()
 
         val handler = Handler()
 
@@ -105,6 +113,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun newBoard() {
+            highScoreValue = sharedPreferences.getInt("highScore_key",0)
+            textHighScoreVal.text = highScoreValue.toString()
             score = 0
             delay = 800F
             setScore()
@@ -133,6 +143,12 @@ class MainActivity : AppCompatActivity() {
             btnPlay.isEnabled = false
             btnPause.isEnabled = false
             textInfo.visibility = View.VISIBLE
+            if (score > highScoreValue) {
+                val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                editor.putInt("highScore_key", score)
+                editor.apply()
+                editor.commit()
+            }
         }
 
         fun newShape(): Boolean {

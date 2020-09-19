@@ -46,10 +46,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/textScore">
 
         <TableRow
             android:id="@+id/Row_0"
@@ -1377,12 +1376,25 @@
         android:id="@+id/textScoreVal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="0"
         android:textAlignment="viewEnd"
         android:textColor="@android:color/holo_red_dark"
         android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textScore" />
+
+    <TextView
+        android:id="@+id/textHighScoreVal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="0"
+        android:textAlignment="viewEnd"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -1391,12 +1403,23 @@
         android:id="@+id/textScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:text="Score:"
         android:textColor="@android:color/background_dark"
         android:textSize="24sp"
         app:layout_constraintEnd_toStartOf="@+id/textScoreVal"
+        app:layout_constraintTop_toBottomOf="@+id/textHighScore" />
+
+    <TextView
+        android:id="@+id/textHighScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="High Score:"
+        android:textColor="@android:color/background_dark"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/textHighScoreVal"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
