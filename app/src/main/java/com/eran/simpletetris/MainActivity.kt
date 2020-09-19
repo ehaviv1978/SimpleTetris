@@ -4,19 +4,17 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import kotlin.concurrent.schedule
 import kotlin.random.Random.Default.nextInt
 
-class MainActivity : AppCompatActivity() {
 
-    private var timer = Timer()
-    private var localTimer = Timer()
+class MainActivity : AppCompatActivity() {
 
     enum class Shape {
         Line, Square, Plus, S1, S2, L1, L2
@@ -27,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val handler = Handler()
 
         btnLeft.isEnabled = false
         btnRight.isEnabled = false
@@ -102,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         fun setScore() {
-            runOnUiThread { textScoreVal.text = score.toString() }
+            textScoreVal.text = score.toString()
         }
 
         fun newBoard() {
@@ -110,39 +109,34 @@ class MainActivity : AppCompatActivity() {
             delay = 800F
             setScore()
             gameOver = false
-            runOnUiThread {
-                textInfo.visibility = View.INVISIBLE
-            }
+            textInfo.visibility = View.INVISIBLE
             for (item in board1d) {
                 item.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
                 item.tag = "Empty"
 
             }
-            runOnUiThread {
-                btnLeft.isEnabled = true
-                btnRight.isEnabled = true
-                btnDown.isEnabled = true
-                GameBoard.isEnabled = true
-                btnPause.isEnabled = true
-            }
+
+            btnLeft.isEnabled = true
+            btnRight.isEnabled = true
+            btnDown.isEnabled = true
+            GameBoard.isEnabled = true
+            btnPause.isEnabled = true
+
         }
 
         fun gameOver() {
             gameOver = true
-            runOnUiThread {
-                btnLeft.isEnabled = false
-                btnRight.isEnabled = false
-                btnDown.isEnabled = false
-                GameBoard.isEnabled = false
-                btnPlay.isEnabled = false
-                btnPause.isEnabled = false
-                textInfo.visibility = View.VISIBLE
-            }
+            btnLeft.isEnabled = false
+            btnRight.isEnabled = false
+            btnDown.isEnabled = false
+            GameBoard.isEnabled = false
+            btnPlay.isEnabled = false
+            btnPause.isEnabled = false
+            textInfo.visibility = View.VISIBLE
         }
 
         fun newShape(): Boolean {
-            timer.cancel()
-            timer = Timer()
+            handler.removeCallbacksAndMessages(null);
             btnDownIsPressed = false
             shape = Shape.values()[nextInt(7)]
             shapeArray = shapeMap[shape]?.toIntArray()!!
@@ -226,7 +220,12 @@ class MainActivity : AppCompatActivity() {
             btnPlay.invalidate()
             score++
             setScore()
-            delay= (delay * 0.998).toFloat()
+            delay = (delay * 0.998).toFloat()
+            val moveDownRunnable: Runnable = object : Runnable {
+                override fun run() {
+                    moveDown()
+                }
+            }
             for (n in shapeArray) {
                 if (n / 10 == 16 || board1d[n + 10].tag == "Full") {
                     for (i in shapeArray) {
@@ -243,11 +242,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     rowsShapeLand.clear()
                     if (newShape()) {
-                        timer.cancel()
-                        timer = Timer()
-                        timer.schedule(delay.toLong()) {
-                            moveDown()
-                        }
+                        handler.removeCallbacks(moveDownRunnable)
+                        handler.postDelayed(moveDownRunnable, delay.toLong());
                     } else {
                         gameOver()
                     }
@@ -262,11 +258,8 @@ class MainActivity : AppCompatActivity() {
                 shapeArray[i] = shapeArray[i] + 10
             }
             if (!btnDownIsPressed) {
-                timer.cancel()
-                timer = Timer()
-                timer.schedule(delay.toLong()) {
-                    moveDown()
-                }
+                handler.removeCallbacks(moveDownRunnable)
+                handler.postDelayed(moveDownRunnable, delay.toLong());
             }
         }
 
@@ -501,71 +494,80 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnPlay.setOnClickListener {
-            runOnUiThread {
-                btnLeft.isEnabled = true
-                btnRight.isEnabled = true
-                btnDown.isEnabled = true
-                GameBoard.isEnabled = true
-                btnPause.isEnabled = true
-                btnPlay.isEnabled = false
-            }
-            timer = Timer()
-            timer.schedule(delay.toLong()) {
-                moveDown()
-            }
+            btnLeft.isEnabled = true
+            btnRight.isEnabled = true
+            btnDown.isEnabled = true
+            GameBoard.isEnabled = true
+            btnPause.isEnabled = true
+            btnPlay.isEnabled = false
+            moveDown()
         }
 
-        btnReset.setOnClickListener(){
-            timer = Timer()
-            localTimer.cancel()
-            localTimer = Timer()
+        btnReset.setOnClickListener() {
+            handler.removeCallbacksAndMessages(null);
             newBoard()
             newShape()
-            timer = Timer()
-            timer.schedule(delay.toLong()) {
+            Handler(Looper.getMainLooper()).postDelayed({
                 moveDown()
+            }, delay.toLong())
+        }
+
+        btnPause.setOnClickListener() {
+            handler.removeCallbacksAndMessages(null);
+            btnLeft.isEnabled = false
+            btnRight.isEnabled = false
+            btnDown.isEnabled = false
+            GameBoard.isEnabled = false
+            btnPlay.isEnabled = true
+            btnPause.isEnabled = false
+        }
+
+        val moveDownRunnable: Runnable = object : Runnable {
+            override fun run() {
+                if (gameOver) {
+                    handler.removeCallbacksAndMessages(null);
+                } else {
+                    moveDown()
+                    handler.postDelayed(this, 40)
+                }
             }
         }
 
-        btnPause.setOnClickListener(){
-            timer.cancel()
-            localTimer.cancel()
-            runOnUiThread {
-                btnLeft.isEnabled = false
-                btnRight.isEnabled = false
-                btnDown.isEnabled = false
-                GameBoard.isEnabled = false
-                btnPlay.isEnabled = true
-                btnPause.isEnabled =false
+        val moveRightRunnable: Runnable = object : Runnable {
+            override fun run() {
+                moveRight()
+                handler.postDelayed(this, 20)
             }
+        }
 
+        val moveLeftRunnable: Runnable = object : Runnable {
+            override fun run() {
+                moveLeft()
+                handler.postDelayed(this, 20)
+            }
         }
 
         btnDown.setOnTouchListener { v, event ->
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     btnDownIsPressed = true
-                    timer.cancel()
-                    timer = Timer()
-                    timer.schedule(200, 40) {
-                        if (gameOver) {
-                            timer.cancel()
-                        } else {
-                            moveDown()
-                        }
-                    }
-
+                    handler.removeCallbacksAndMessages(null);
+                    handler.postDelayed(moveDownRunnable, 200);
                 }
                 MotionEvent.ACTION_UP -> {
                     if (btnDownIsPressed) {
                         btnDownIsPressed = false
                         if (!gameOver) {
-                            timer.cancel()
-                            timer = Timer()
+                            handler.removeCallbacksAndMessages(null);
                             moveDown()
                         } else {
-                            timer.cancel()
+                            handler.removeCallbacksAndMessages(null);
                         }
+                    } else {
+                        handler.removeCallbacksAndMessages(null);
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            moveDown()
+                        }, delay.toLong())
                     }
                 }
             }
@@ -576,13 +578,10 @@ class MainActivity : AppCompatActivity() {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     moveRight()
-                    localTimer = Timer()
-                    localTimer.schedule(200, 20) {
-                        moveRight()
-                    }
+                    handler.postDelayed(moveRightRunnable, 200);
                 }
                 MotionEvent.ACTION_UP -> {
-                    localTimer.cancel()
+                    handler.removeCallbacks(moveRightRunnable)
                 }
             }
             v?.onTouchEvent(event) ?: true
@@ -592,13 +591,10 @@ class MainActivity : AppCompatActivity() {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     moveLeft()
-                    localTimer = Timer()
-                    localTimer.schedule(200, 20) {
-                        moveLeft()
-                    }
+                    handler.postDelayed(moveLeftRunnable, 200);
                 }
                 MotionEvent.ACTION_UP -> {
-                    localTimer.cancel()
+                    handler.removeCallbacks(moveLeftRunnable)
                 }
             }
             v?.onTouchEvent(event) ?: true
