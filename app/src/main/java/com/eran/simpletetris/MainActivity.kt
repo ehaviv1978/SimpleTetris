@@ -1,5 +1,6 @@
 package com.eran.simpletetris
 
+import android.R.attr.*
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -11,6 +12,7 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.random.Random.Default.nextInt
@@ -29,11 +31,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val sharedPreferences: SharedPreferences = this.getSharedPreferences(sharedPrefFile,Context.MODE_PRIVATE)
-        var highScoreValue = sharedPreferences.getInt("highScore_key",0)
+        if (supportActionBar != null)
+            supportActionBar?.hide()
+
+        val sharedPreferences: SharedPreferences = this.getSharedPreferences(sharedPrefFile, Context.MODE_PRIVATE)
+        var highScoreValue = sharedPreferences.getInt("highScore_key", 0)
         textHighScoreVal.text = highScoreValue.toString()
 
         val handler = Handler()
+
+//        val mp_click = MediaPlayer.create(this,R.raw.soft_click)
 
         btnLeft.isEnabled = false
         btnRight.isEnabled = false
@@ -41,6 +48,8 @@ class MainActivity : AppCompatActivity() {
         btnPause.isEnabled = false
         btnPlay.isEnabled = false
         GameBoard.isEnabled = false
+
+//        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
 //        val rows = arrayOf(
 //            Row_0, Row_1, Row_2, Row_3, Row_4, Row_5, Row_6, Row_7, Row_8, Row_9, Row_10, Row_11, Row_12, Row_13, Row_14, Row_15, Row_16
@@ -63,7 +72,9 @@ class MainActivity : AppCompatActivity() {
             View_13_0, View_13_1, View_13_2, View_13_3, View_13_4, View_13_5, View_13_6, View_13_7, View_13_8, View_13_9,
             View_14_0, View_14_1, View_14_2, View_14_3, View_14_4, View_14_5, View_14_6, View_14_7, View_14_8, View_14_9,
             View_15_0, View_15_1, View_15_2, View_15_3, View_15_4, View_15_5, View_15_6, View_15_7, View_15_8, View_15_9,
-            View_16_0, View_16_1, View_16_2, View_16_3, View_16_4, View_16_5, View_16_6, View_16_7, View_16_8, View_16_9
+            View_16_0, View_16_1, View_16_2, View_16_3, View_16_4, View_16_5, View_16_6, View_16_7, View_16_8, View_16_9,
+            View_17_0, View_17_1, View_17_2, View_17_3, View_17_4, View_17_5, View_17_6, View_17_7, View_17_8, View_17_9,
+            View_18_0, View_18_1, View_18_2, View_18_3, View_18_4, View_18_5, View_18_6, View_18_7, View_18_8, View_18_9
         )
 
         val displayMetrics = DisplayMetrics()
@@ -95,7 +106,8 @@ class MainActivity : AppCompatActivity() {
             Shape.L2 to arrayOf(0 + startPosition, 1 + startPosition, 10 + startPosition, 20 + startPosition)
         )
 
-        var shapeArray = intArrayOf(4)
+        var shapeArray = IntArray(4)
+        var shapeArrayLand = IntArray(4)
         var shapeColor: Int = Color.WHITE
 
         val shapeColorMap = mapOf(
@@ -113,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun newBoard() {
-            highScoreValue = sharedPreferences.getInt("highScore_key",0)
+            highScoreValue = sharedPreferences.getInt("highScore_key", 0)
             textHighScoreVal.text = highScoreValue.toString()
             score = 0
             delay = 800F
@@ -151,7 +163,61 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        fun shapeLand(){
+            var land = false
+            var i = 10
+            fun shapeLandColor(){
+                for (item in shapeArray){
+                    if ((item +i -10)<190 && board1d[item + i - 10].tag == "Empty") {
+                        board1d[item + i-10].backgroundTintList = ColorStateList.valueOf(Color.DKGRAY)
+//                        runOnUiThread {
+////                            board1d[item + i - 10].layoutParams.width -=2
+////                            board1d[item + i - 10].layoutParams.height -= 2
+//                            lp.setMargins(2, 2, 2, 2)
+//                            board1d[item + i - 10].layoutParams = lp
+//                        }
+                    }
+                }
+                land = true
+                for ((n, item) in shapeArray.withIndex()){
+                    if ((item +i-10)<190) {
+                        shapeArrayLand[n] = item + i -10
+                    }
+                }
+            }
+            while (!land){
+                for (item in shapeArray){
+                    if ((item + i) > 189){
+                        shapeLandColor()
+                        break
+                    }
+                    if (board1d[item + i].tag == "Full"){
+                        shapeLandColor()
+                        break
+                    }
+                }
+                i+=10
+            }
+        }
+
+        fun shapeLandClear (){
+            for (item in shapeArrayLand) {
+                if (board1d[item].tag == "Empty") {
+                    board1d[item].backgroundTintList = ColorStateList.valueOf(Color.BLACK)
+//                    runOnUiThread {
+////                        board1d[item].layoutParams.width = squareSize
+////                        board1d[item].layoutParams.height = squareSize
+//                        lp.setMargins(1, 1, 1, 1)
+//                        board1d[item].layoutParams = lp
+//                    }
+                }
+            }
+        }
+
         fun newShape(): Boolean {
+//            mp_click.stop()
+//            mp_click.prepare()
+//            mp_click.start()
             handler.removeCallbacksAndMessages(null);
             btnDownIsPressed = false
             shape = Shape.values()[nextInt(7)]
@@ -164,10 +230,15 @@ class MainActivity : AppCompatActivity() {
                 board1d[n].backgroundTintList = ColorStateList.valueOf(shapeColor as Int)
                 board1d[n].tag = "Shape"
             }
+            shapeLandClear()
+            shapeLand()
             return true
         }
 
         fun moveRight() {
+//            mp_click.stop()
+//            mp_click.prepare()
+//            mp_click.start()
             for (n in shapeArray) {
                 if (n % 10 == 9 || board1d[n + 1].tag == "Full") {
                     return
@@ -180,9 +251,14 @@ class MainActivity : AppCompatActivity() {
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] + 1
             }
+            shapeLandClear()
+            shapeLand()
         }
 
         fun moveLeft() {
+//            mp_click.stop()
+//            mp_click.prepare()
+//            mp_click.start()
             for (n in shapeArray) {
                 if (n % 10 == 0 || board1d[n - 1].tag == "Full") {
                     return
@@ -195,6 +271,8 @@ class MainActivity : AppCompatActivity() {
                 board1d[shapeArray[i]].tag = "Empty"
                 shapeArray[i] = shapeArray[i] - 1
             }
+            shapeLandClear()
+            shapeLand()
         }
 
         fun rowsToDelete() {
@@ -232,8 +310,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun moveDown() {
-            GameBoard.invalidate()
-            btnPlay.invalidate()
+//            mp_click.stop()
+//            mp_click.prepare()
+//            mp_click.start()
             score++
             setScore()
             delay = (delay * 0.998).toFloat()
@@ -243,14 +322,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             for (n in shapeArray) {
-                if (n / 10 == 16 || board1d[n + 10].tag == "Full") {
+                if (n / 10 == 18 || board1d[n + 10].tag == "Full") {
                     for (i in shapeArray) {
                         board1d[i].tag = "Full"
                         rowsShapeLand.add(i / 10)
                     }
                     rowsToDelete()
                     if (rowsShapeLand.size > 0) {
-                        delay += rowsShapeLand.size * rowsShapeLand.size
+                        delay += rowsShapeLand.size * rowsShapeLand.size * rowsShapeLand.size
                         score += rowsShapeLand.size * rowsShapeLand.size * 10
                         setScore()
                         deleteRows()
@@ -337,7 +416,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[3] = shapeArray[2] + 1
                     createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 2) {
-                    if (shapeArray[2] > 160) {
+                    if (shapeArray[2] > 180) {
                         return
                     }
                     if (board1d[shapeArray[2] + 10].tag != "Empty") {
@@ -358,7 +437,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else if (shape == Shape.S1) {
                 if (shapeArray[1] - shapeArray[0] == 1) {
-                    if (shapeArray[2] / 10 == 16) {
+                    if (shapeArray[2] / 10 == 18) {
                         return
                     }
                     if (board1d[shapeArray[2] + 9].tag == "Full") {
@@ -381,7 +460,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else if (shape == Shape.S2) {
                 if (shapeArray[1] - shapeArray[0] == 1) {
-                    if (shapeArray[3] + 10 > 169) {
+                    if (shapeArray[3] + 10 > 189) {
                         return
                     }
                     if (board1d[shapeArray[3] + 10].tag == "Full") {
@@ -432,7 +511,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[3] = shapeArray[2] + 1
                     createShape()
                 } else if (shapeArray[1] - shapeArray[0] == 8) {
-                    if (shapeArray[1] / 10 == 16 || board1d[shapeArray[2] + 10].tag != "Empty" ||
+                    if (shapeArray[1] / 10 == 18 || board1d[shapeArray[2] + 10].tag != "Empty" ||
                         board1d[shapeArray[2] + 11].tag != "Empty" || board1d[shapeArray[2] - 10].tag != "Empty"
                     ) {
                         return
@@ -483,7 +562,7 @@ class MainActivity : AppCompatActivity() {
                     shapeArray[0] = shapeArray[1] - 10
                     createShape()
                 } else if (shapeArray[3] - shapeArray[1] == 2) {
-                    if (shapeArray[1] / 10 == 16 || board1d[shapeArray[2] + 10].tag != "Empty" ||
+                    if (shapeArray[1] / 10 == 18 || board1d[shapeArray[2] + 10].tag != "Empty" ||
                         board1d[shapeArray[2] - 9].tag != "Empty" || board1d[shapeArray[2] - 10].tag != "Empty"
                     ) {
                         return
@@ -507,6 +586,8 @@ class MainActivity : AppCompatActivity() {
                     createShape()
                 }
             }
+            shapeLandClear()
+            shapeLand()
         }
 
         btnPlay.setOnClickListener {
