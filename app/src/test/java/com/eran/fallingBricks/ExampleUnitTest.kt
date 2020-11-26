@@ -1,4 +1,4 @@
-package com.eran.simpletetris
+package com.eran.fallingBricks
 
 import org.junit.Test
 

@@ -1,6 +1,5 @@
-package com.eran.simpletetris
+package com.eran.fallingBricks
 
-import android.R.attr.*
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -12,7 +11,6 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.View
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.random.Random.Default.nextInt
@@ -20,7 +18,7 @@ import kotlin.random.Random.Default.nextInt
 
 class MainActivity : AppCompatActivity() {
 
-    private val sharedPrefFile = "com.eran.simpletetris.highScore"
+    private val sharedPrefFile = "com.eran.fallingBricks.highScore"
 
     enum class Shape {
         Line, Square, Plus, S1, S2, L1, L2
