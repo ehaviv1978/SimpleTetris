@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         btnRight.isEnabled = false
         btnDown.isEnabled = false
         btnPause.isEnabled = false
-        btnPlay.isEnabled = false
         GameBoard.isEnabled = false
 
 //        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -118,6 +117,8 @@ class MainActivity : AppCompatActivity() {
             Shape.L2 to Color.WHITE
         )
 
+        var newGame = true
+
         fun setScore() {
             textScoreVal.text = score.toString()
         }
@@ -135,12 +136,12 @@ class MainActivity : AppCompatActivity() {
                 item.tag = "Empty"
 
             }
-
-            btnLeft.isEnabled = true
-            btnRight.isEnabled = true
-            btnDown.isEnabled = true
-            GameBoard.isEnabled = true
-            btnPause.isEnabled = true
+            btnLeft.isEnabled = false
+            btnRight.isEnabled = false
+            btnDown.isEnabled = false
+            GameBoard.isEnabled = false
+            btnPause.isEnabled = false
+            btnPlay.isEnabled = true
 
         }
 
@@ -168,12 +169,6 @@ class MainActivity : AppCompatActivity() {
                 for (item in shapeArray){
                     if ((item +i -10)<190 && board1d[item + i - 10].tag == "Empty") {
                         board1d[item + i-10].backgroundTintList = ColorStateList.valueOf(Color.DKGRAY)
-//                        runOnUiThread {
-////                            board1d[item + i - 10].layoutParams.width -=2
-////                            board1d[item + i - 10].layoutParams.height -= 2
-//                            lp.setMargins(2, 2, 2, 2)
-//                            board1d[item + i - 10].layoutParams = lp
-//                        }
                     }
                 }
                 land = true
@@ -202,12 +197,6 @@ class MainActivity : AppCompatActivity() {
             for (item in shapeArrayLand) {
                 if (board1d[item].tag == "Empty") {
                     board1d[item].backgroundTintList = ColorStateList.valueOf(Color.BLACK)
-//                    runOnUiThread {
-////                        board1d[item].layoutParams.width = squareSize
-////                        board1d[item].layoutParams.height = squareSize
-//                        lp.setMargins(1, 1, 1, 1)
-//                        board1d[item].layoutParams = lp
-//                    }
                 }
             }
         }
@@ -589,22 +578,28 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnPlay.setOnClickListener {
+            if (newGame) {
+                newGame = false
+                newBoard()
+                newShape()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    moveDown()
+                }, delay.toLong())
+            }else {
+                moveDown()
+            }
             btnLeft.isEnabled = true
             btnRight.isEnabled = true
             btnDown.isEnabled = true
             GameBoard.isEnabled = true
             btnPause.isEnabled = true
             btnPlay.isEnabled = false
-            moveDown()
         }
 
         btnReset.setOnClickListener() {
             handler.removeCallbacksAndMessages(null);
+            newGame = true
             newBoard()
-            newShape()
-            Handler(Looper.getMainLooper()).postDelayed({
-                moveDown()
-            }, delay.toLong())
         }
 
         btnPause.setOnClickListener() {
