@@ -1602,7 +1602,7 @@
         android:id="@+id/btnLeft"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="110dp"
         android:layout_marginEnd="1dp"
         android:background="@color/colorAccent"
         android:backgroundTint="@android:color/holo_red_light"
@@ -1703,5 +1703,156 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
+    <View
+        android:id="@+id/viewNextShape0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape3"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape1"
+        app:layout_constraintStart_toStartOf="@+id/btnLeft"
+        app:layout_constraintTop_toTopOf="@+id/GameBoard" />
+
+    <View
+        android:id="@+id/viewNextShape1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="1dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape4"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape2"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape0"
+        app:layout_constraintTop_toTopOf="@+id/GameBoard" />
+
+    <View
+        android:id="@+id/viewNextShape2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape5"
+        app:layout_constraintEnd_toStartOf="@+id/GameBoard"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape1"
+        app:layout_constraintTop_toTopOf="@+id/GameBoard" />
+
+    <View
+        android:id="@+id/viewNextShape3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="1dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape6"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape4"
+        app:layout_constraintStart_toStartOf="@+id/btnLeft"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape0" />
+
+    <View
+        android:id="@+id/viewNextShape4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape7"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape5"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape3"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape1" />
+
+    <View
+        android:id="@+id/viewNextShape5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="8dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape8"
+        app:layout_constraintEnd_toStartOf="@+id/GameBoard"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape4"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape2" />
+
+    <View
+        android:id="@+id/viewNextShape6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="1dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape9"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape7"
+        app:layout_constraintStart_toStartOf="@+id/btnLeft"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape3" />
+
+    <View
+        android:id="@+id/viewNextShape7"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape10"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape8"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape6"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape4" />
+
+    <View
+        android:id="@+id/viewNextShape8"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="8dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/viewNextShape11"
+        app:layout_constraintEnd_toStartOf="@+id/GameBoard"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape7"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape5" />
+
+    <View
+        android:id="@+id/viewNextShape9"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="20dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/btnLeft"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape10"
+        app:layout_constraintStart_toStartOf="@+id/btnLeft"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape6" />
+
+    <View
+        android:id="@+id/viewNextShape10"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="20dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/btnLeft"
+        app:layout_constraintEnd_toStartOf="@+id/viewNextShape11"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape9"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape7" />
+
+    <View
+        android:id="@+id/viewNextShape11"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="20dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/btnLeft"
+        app:layout_constraintEnd_toStartOf="@+id/GameBoard"
+        app:layout_constraintStart_toEndOf="@+id/viewNextShape10"
+        app:layout_constraintTop_toBottomOf="@+id/viewNextShape8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

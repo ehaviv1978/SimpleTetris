@@ -74,6 +74,12 @@ class MainActivity : AppCompatActivity() {
             View_18_0, View_18_1, View_18_2, View_18_3, View_18_4, View_18_5, View_18_6, View_18_7, View_18_8, View_18_9
         )
 
+        val nextShapeView = arrayOf(viewNextShape0, viewNextShape1,viewNextShape2, viewNextShape3, viewNextShape4,
+            viewNextShape5, viewNextShape6, viewNextShape7, viewNextShape8, viewNextShape9, viewNextShape10, viewNextShape11
+            )
+
+        var nextShape: Shape
+
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
 
@@ -92,6 +98,7 @@ class MainActivity : AppCompatActivity() {
         var score = 0
         var delay = 800F
         var shape = Shape.values()[nextInt(7)]  //get a random shape from Shape Enum
+        nextShape = shape
 
         val shapeMap = mapOf(
             Shape.Line to arrayOf(0 + startPosition, 10 + startPosition, 20 + startPosition, 30 + startPosition),
@@ -121,6 +128,60 @@ class MainActivity : AppCompatActivity() {
 
         fun setScore() {
             textScoreVal.text = score.toString()
+        }
+
+        fun clearNextShape () {
+            for (square in nextShapeView){
+                square.setBackgroundColor(Color.BLACK)
+            }
+        }
+
+        fun drawNextShape () {
+            clearNextShape()
+            when (nextShape) {
+                Shape.Line -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[7].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[10].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.Square -> {
+                    nextShapeView[0].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[3].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.Plus -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[7].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[5].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.S1 -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[3].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[6].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.S2 -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[5].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[8].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.L1 -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[7].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[0].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+                Shape.L2 -> {
+                    nextShapeView[1].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[4].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[7].setBackgroundColor(shapeColorMap[nextShape]!!)
+                    nextShapeView[2].setBackgroundColor(shapeColorMap[nextShape]!!)
+                }
+            }
         }
 
         fun newBoard() {
@@ -207,7 +268,9 @@ class MainActivity : AppCompatActivity() {
 //            mp_click.start()
             handler.removeCallbacksAndMessages(null);
             btnDownIsPressed = false
-            shape = Shape.values()[nextInt(7)]
+            shape = nextShape
+            nextShape = Shape.values()[nextInt(7)]
+            drawNextShape()
             shapeArray = shapeMap[shape]?.toIntArray()!!
             shapeColor = shapeColorMap[shape]!!
             for (n in shapeArray) {
@@ -600,6 +663,8 @@ class MainActivity : AppCompatActivity() {
             handler.removeCallbacksAndMessages(null);
             newGame = true
             newBoard()
+            nextShape = Shape.values()[nextInt(7)]
+            clearNextShape()
         }
 
         btnPause.setOnClickListener() {
